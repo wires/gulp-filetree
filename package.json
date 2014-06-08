@@ -1,0 +1,18 @@
+{
+  "author": "Jelle 'wires' Herold <jelle@defekt.nl> (http://defekt.nl/)",
+  "name": "gulp-filetree",
+  "description": "Compute file tree and add as property",
+  "version": "0.0.1",
+  "main": "gulp-filetree.js",
+  "homepage": "https://github.com/0x01/gulp-filetree",
+  "repository": "git://github.com/0x01/gulp-filetree.git",
+  "keywords": [
+    "gulpplugin"
+  ],
+  "dependencies": {
+    "kew": "^0.4.0",
+    "lodash": "^2.4.1",
+    "through2": "^0.5.1",
+    "vinyl": "^0.2.3"
+  }
+}
