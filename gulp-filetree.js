@@ -71,7 +71,7 @@ module.exports = function(options) {
 
     options.order = options.order || 'bfs';
 
-    options.map = options.m || function(tree, element) {
+    options.map = options.map || function(tree, element) {
         // give FS tree property
         element[options.tree_property] = tree;
         return element;
