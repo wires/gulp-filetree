@@ -1,9 +1,27 @@
 // demo gulpfile
 
+var archy = require('archy');
 var gulp = require('gulp');
 var tree = require('./gulp-filetree');
 var $ = require('gulp-load-plugins')();
-var archy = require('archy');
+
+gulp.task('default', function(){
+	var once = true; // lalz0r
+	return gulp.src('node_modules/gulp-load-plugins/**')
+		.pipe($.map(function(file){
+			if(file.path.match(/package\.json/))
+				return file;
+		}))
+		.pipe(tree({cwdRelative: true}))
+		.pipe($.map(function(file){
+			if(once) {
+				console.log(archy(file.tree));
+				once = !once;
+			}
+
+			return file;
+		}))
+});
 
 /*
 
@@ -357,7 +375,7 @@ gulp.task('test-files-only', function(){
 	 */
 });
 
-gulp.task('default', [
+gulp.task('tests', [
 	'test-cwd-relative',
 	'test-show-need-for-relative',
 	'test-with-directories',
