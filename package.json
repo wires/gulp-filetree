@@ -10,9 +10,19 @@
     "gulpplugin"
   ],
   "dependencies": {
+    "archy": "0.0.2",
     "kew": "^0.4.0",
     "lodash": "^2.4.1",
     "through2": "^0.5.1",
     "vinyl": "^0.2.3"
+  },
+  "devDependencies": {
+    "archy": "0.0.2",
+    "gulp": "^3.7.0",
+    "gulp-debug": "^0.3.0",
+    "gulp-load-plugins": "^0.5.1",
+    "gulp-map": "0.0.1",
+    "map-stream": "^0.1.0",
+    "t": "^0.5.1"
   }
 }

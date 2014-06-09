@@ -7,27 +7,69 @@ It's readable and documented! :-)
 
 Quick! Start!
 
+	$ npm i --save-dev gulp-filetree gulp-map gulp-load-plugins archy
+
+Quick, edit `gulpfile.js`!
+
+```js
+
 	var gulp = require('gulp');
-	var tree = require('gulp-filetree');
+	var archy = require('archy');
+	var $ = require('gulp-load-plugins')();
 
 	gulp.task('default', function(){
-		return gulp.src('test/**')
-			.pipe(tree({show_tree: true}));
-			// every file emitted from this pipe will have a 'tree' property
+		var once = true; // lalz0r
+		return gulp.src('node_modules/gulp-map/**')
+			.pipe($.map(function(file){
+				if(file.path.match(/package\.json/))
+					return file
+			}))
+			.pipe($.filetree({cwdRelative: true}))
+			.pipe($.map(function(file){
+				// file.tree: tree of files passed into $.filetree
+				// file.subtree: subtree rooted at this file
+
+				if(once) {
+					console.log(archy(file.tree));
+					once = !once;
+				}
+
+				return file;
+			}))
 	});
+
+```
 
 Output
 
-    ~/r/G/gulp-filetree » gulp
-	[gulp] Using gulpfile /Users/wires/r/Gulp/gulp-filetree/gulpfile.js
-	[gulp] Starting 'default'...
-	test/
-	  a.txt
-	  b.txt
-	  c/
-	    d.txt
-	    e.txt
-	[gulp] Finished 'default' after 15 ms
+    [22:01:01] Using gulpfile /tmp/test/gulpfile.js
+    [22:01:01] Starting 'default'...
+    node_modules
+    └─┬ gulp-map
+      ├── package.json
+      └─┬ node_modules
+        ├─┬ is-promise
+        │ └── package.json
+        ├─┬ kew
+        │ └── package.json
+        └─┬ through2
+          ├── package.json
+          └─┬ node_modules
+            ├─┬ readable-stream
+            │ ├── package.json
+            │ └─┬ node_modules
+            │   ├─┬ core-util-is
+            │   │ └── package.json
+            │   ├─┬ inherits
+            │   │ └── package.json
+            │   ├─┬ isarray
+            │   │ └── package.json
+            │   └─┬ string_decoder
+            │     └── package.json
+            └─┬ xtend
+              └── package.json
+
+    [22:01:01] Finished 'default' after 81 ms
 
 ### What happened?
 
@@ -42,37 +84,29 @@ Suppose you have this tree in a subdirectory `test`.
 
 This plugin will then compute a tree like this:
 
-	{ children: {
-	    'a.txt': <File ..>,
-	    'b.txt': <File ..>,
-	    'c': { // extends <File ..>,
-	      children: {
-	        'd.txt': <File ..>,
-	        'e.txt': <File ..>
+```js
+
+	{ label: '.',
+	  leaf: undefined,
+	  parent: undefined,
+	  nodes: [
+		  { label: 'a.txt',
+		    leaf: <File ..>,
+		    parent: <Tree ..>, // reference
+		    nodes: []
+		  },
+		  { label: 'b.txt',
+		    leaf: <File ..>,
+		    parent: <Tree ..>, // reference
+		    nodes: [ { label: 'd.txt', ... } ,
+		             { label: 'e.txt', ... } ]
 	      }
-	    }
-	  }
+	  ]
 	}
+```
 
-You can change the shape (well, labeling) of this tree with the options
-`node_property` and `children_property`. When set to 'leaf' and 'branches',
-for instance, one would get:
-
-	{ branches: {
-	    'a.txt': { node: <File ..> },
-	    'b.txt': { node: <File ..> },
-	    'c': {
-	      node: <File ..>,
-	      branches: {
-	      'd.txt': { node: <File ..> },
-	      'e.txt': { node: <File ..> }
-	      }
-	    }
-	  }
-	}
-
-Because we passed the option `show_tree: true`, our tree was rendered to the
-console.
+This tree is then used to add properties 'tree' and 'subtree' to the files
+passing though this filter.
 
 ### Okay, then what?
 
@@ -80,104 +114,67 @@ Once all files are collected and a tree of them has been constructed, that
 tree is traversed in the given order (`options.order`, default is BFS).
 
 Each visited file then gets a property `tree` (option `tree_property`)
-pointing to the tree and it is emitted again.
+pointing to the complete tree.
 
-ps. This doesn't work with watch streams, yet, see issue #1.
+The is also a property `subtree` (option `subtree_property`),
+which has the tree restricted to the subtree rooted at that file.
 
 ## Options
 
 You can set some basic options.
 
-	 var options = {
-		// (deep) property name where tree is injected
-		tree_property: "meta.tree",
+```js
 
-		// name of 'children' property used in the tree
-		children_property: "_children",
+	var options = {
+		// name of the 'tree' property
+		tree_property: "tree",
 
-		// name of 'node' property used in the tree, may be empty
-		node_property: '',
+		// name of 'subtree' property
+		subtree_property: "subtree",
 
-	   // file emitting order: breath-first / depth-first ("DFS")
-		order: "DFS"
-	 };
+		// file emitting order: breath-first / depth-first ("DFS")
+		order: "DFS",
+
+		// compute filepath path relative to current working directory
+		cwdRelative: true // relative to file.base path if false
+	};
+```
 
 ### Showing the tree
 
-There is a very primitive tree renderer whose output you can
-pass to a function of your choice. For example
-
-	options.show_tree = console.log.bind(console);
-
-There is a shortcut for this
-
-	options.show_tree = true;
+Archy can render it fine. Pretty-tree doesn't like the circular structure
+of the `parent` and `leaf.tree`/`leaf.subtree` properties.
 
 ### Tapping the tree, transforming the tree
 
-Or instead you might want to dump part of the tree to a JSON file?
+I've had limited succes with [`t`](https://github.com/aaronj1335/t-js).
+Traversals work, mapping doesn't. Be sure to pass the option
+`{childName:'nodes'}`.
+
+
+```js
 
 	var path = require('path');
 	var t = require('t');
 
-	options.intercept_tree = function(tree, tree_map) {
-		var siteIndex = {}
-
+	.pipe($.map(function(file){
 		// this should be a persistent datastructure
-		t.map(tree, function(node){ return path.basename(node.path) });
+		t.bfs(file.subtree, function(node){
+			var basename = path.basename(node.leaf.path);
+			console.log('\t' + basename);
+		});
+	});
 
+	// this below fo sho doesn't work, but I want to be able to do this
+	.pipe($.map(function(file){
 		// write to a file and pass through untouched on success.
 		return Q
-			.nfcall(fs.writeFile, 'siteIndex.json', JSON.stringify(siteIndex))
+			.nfcall(fs.writeFile,
+				'siteIndex.json',
+				JSON.stringify(file.tree)
+			))
 			.then(function(){
 				return tree;
 			});
 	}
-
-### Mapping function (`options.map`)
-
-The 'assign tree property and emit' behaviour can be overwritten by
-passing a custom mapping function. Here is a silly example demonstrating
-the function type.
-
-	options.map = function(node, children, tree) {
-		node.meta.pipeline.tree = tree;
-		return node;
-	}
-
-If `undefined` is returned, no file is emitted.
-
-To emit more than one file, simply invocate `this.push(vinyl_object)` for
-each file (and don't return anything).
-
-### Asynchronous mapping (`options.asyncMap`)
-
-You can map asynchronously using Promises.
-Just assign a function that returns a Promise to `options.asyncMap`.
-
-	options.asyncMap = function(tree, node){
-	   return Q.delay(100)
-	      .then(function(){
-	         return node;
-	      });
-	});
-
-Behaviour based on return value is similar to `options.map` and `this.push`
-is also available.
-
-### Getting funky with the mapping function.
-
-To work with trees you can use [`t`](https://github.com/aaronj1335/t-js). It is
-a library that does tree traversals.
-
-To restrict the tree to a subtree rooted at that file, we can do this
-
-	options.map = function(node, children, tree) {
-		var subtree = t.find(tree, function(n, parent){
-			return node.path === n.path;
-		});
-		node[options.tree_property] = subtree;
-		return node;
-	}
-
-Etc.
+```
