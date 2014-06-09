@@ -7,17 +7,17 @@
   "homepage": "https://github.com/0x01/gulp-filetree",
   "repository": "git://github.com/0x01/gulp-filetree.git",
   "keywords": [
-    "gulpplugin"
+    "gulpplugin", "gulpfriendly"
   ],
   "dependencies": {
     "archy": "0.0.2",
-    "through2": "^0.5.1",
+    "through2": "^0.5.1"
   },
   "devDependencies": {
     "archy": "0.0.2",
     "gulp": "^3.7.0",
     "gulp-debug": "^0.3.0",
     "gulp-load-plugins": "^0.5.1",
-    "gulp-map": "0.0.1",
+    "gulp-map": "0.0.1"
   }
 }
