@@ -7,7 +7,7 @@ var $ = require('gulp-load-plugins')();
 
 gulp.task('default', function(){
 	var once = true; // lalz0r
-	return gulp.src('node_modules/gulp-load-plugins/**')
+	return gulp.src('node_modules/gulp-map/**')
 		.pipe($.map(function(file){
 			if(file.path.match(/package\.json/))
 				return file;

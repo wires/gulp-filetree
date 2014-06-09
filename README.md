@@ -40,34 +40,7 @@ gulp.task('default', function(){
 
 Output
 
-    [22:01:01] Using gulpfile /tmp/test/gulpfile.js
-    [22:01:01] Starting 'default'...
-    node_modules
-    └─┬ gulp-map
-      ├── package.json
-      └─┬ node_modules
-        ├─┬ is-promise
-        │ └── package.json
-        ├─┬ kew
-        │ └── package.json
-        └─┬ through2
-          ├── package.json
-          └─┬ node_modules
-            ├─┬ readable-stream
-            │ ├── package.json
-            │ └─┬ node_modules
-            │   ├─┬ core-util-is
-            │   │ └── package.json
-            │   ├─┬ inherits
-            │   │ └── package.json
-            │   ├─┬ isarray
-            │   │ └── package.json
-            │   └─┬ string_decoder
-            │     └── package.json
-            └─┬ xtend
-              └── package.json
-
-    [22:01:01] Finished 'default' after 81 ms
+![Alt screenshot](screenshot.jpg)
 
 ### What happened?
 
