@@ -40,7 +40,7 @@ gulp.task('default', function(){
 
 Output
 
-![Alt screenshot](screenshot.jpg)
+![Alt screenshot](screenshot.png)
 
 ### What happened?
 
