@@ -7,37 +7,35 @@ It's readable and documented! :-)
 
 Quick! Start!
 
-	$ npm i --save-dev gulp-filetree gulp-map gulp-load-plugins archy
+	$ npm i --save-dev gulp-load-plugins gulp-map gulp-filetree archy
 
 Quick, edit `gulpfile.js`!
 
 ```js
+var gulp = require('gulp');
+var archy = require('archy');
+var $ = require('gulp-load-plugins')();
 
-	var gulp = require('gulp');
-	var archy = require('archy');
-	var $ = require('gulp-load-plugins')();
+gulp.task('default', function(){
+	var once = true; // lalz0r
+	return gulp.src('node_modules/gulp-map/**')
+		.pipe($.map(function(file){
+			if(file.path.match(/package\.json/))
+				return file
+		}))
+		.pipe($.filetree({cwdRelative: true}))
+		.pipe($.map(function(file){
+			// file.tree: tree of files passed into $.filetree
+			// file.subtree: subtree rooted at this file
 
-	gulp.task('default', function(){
-		var once = true; // lalz0r
-		return gulp.src('node_modules/gulp-map/**')
-			.pipe($.map(function(file){
-				if(file.path.match(/package\.json/))
-					return file
-			}))
-			.pipe($.filetree({cwdRelative: true}))
-			.pipe($.map(function(file){
-				// file.tree: tree of files passed into $.filetree
-				// file.subtree: subtree rooted at this file
+			if(once) {
+				console.log(archy(file.tree));
+				once = !once;
+			}
 
-				if(once) {
-					console.log(archy(file.tree));
-					once = !once;
-				}
-
-				return file;
-			}))
-	});
-
+			return file;
+		}))
+});
 ```
 
 Output
@@ -85,7 +83,6 @@ Suppose you have this tree in a subdirectory `test`.
 This plugin will then compute a tree like this:
 
 ```js
-
 	{ label: '.',
 	  leaf: undefined,
 	  parent: undefined,
@@ -124,20 +121,19 @@ which has the tree restricted to the subtree rooted at that file.
 You can set some basic options.
 
 ```js
+var options = {
+	// name of the 'tree' property
+	tree_property: "tree",
 
-	var options = {
-		// name of the 'tree' property
-		tree_property: "tree",
+	// name of 'subtree' property
+	subtree_property: "subtree",
 
-		// name of 'subtree' property
-		subtree_property: "subtree",
+	// file emitting order: breath-first / depth-first ("DFS")
+	order: "DFS",
 
-		// file emitting order: breath-first / depth-first ("DFS")
-		order: "DFS",
-
-		// compute filepath path relative to current working directory
-		cwdRelative: true // relative to file.base path if false
-	};
+	// compute filepath path relative to current working directory
+	cwdRelative: true // relative to file.base path if false
+};
 ```
 
 ### Showing the tree
@@ -153,28 +149,27 @@ Traversals work, mapping doesn't. Be sure to pass the option
 
 
 ```js
+var path = require('path');
+var t = require('t');
 
-	var path = require('path');
-	var t = require('t');
-
-	.pipe($.map(function(file){
-		// this should be a persistent datastructure
-		t.bfs(file.subtree, function(node){
-			var basename = path.basename(node.leaf.path);
-			console.log('\t' + basename);
-		});
+.pipe($.map(function(file){
+	// this should be a persistent datastructure
+	t.bfs(file.subtree, function(node){
+		var basename = path.basename(node.leaf.path);
+		console.log('\t' + basename);
 	});
+});
 
-	// this below fo sho doesn't work, but I want to be able to do this
-	.pipe($.map(function(file){
-		// write to a file and pass through untouched on success.
-		return Q
-			.nfcall(fs.writeFile,
-				'siteIndex.json',
-				JSON.stringify(file.tree)
-			))
-			.then(function(){
-				return tree;
-			});
-	}
+// this below fo sho doesn't work, but I want to be able to do this
+.pipe($.map(function(file){
+	// write to a file and pass through untouched on success.
+	return Q
+		.nfcall(fs.writeFile,
+			'siteIndex.json',
+			JSON.stringify(file.tree)
+		))
+		.then(function(){
+			return tree;
+		});
+}
 ```
